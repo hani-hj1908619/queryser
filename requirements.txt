@@ -1,4 +1,9 @@
 pandas
 streamlit
 supabase
+<<<<<<< Updated upstream
 sqlvalidator
+=======
+
+postgrest
+>>>>>>> Stashed changes
