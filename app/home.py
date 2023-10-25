@@ -2,9 +2,10 @@ from collections import namedtuple
 import math
 import pandas as pd
 import streamlit as st
+import enum
+import queryser
 
-import repo
-
+    
 st.set_page_config(
     page_title="Queryser",
     page_icon="🪣",
@@ -28,15 +29,21 @@ def home():
     )
 
     st.header("Enter SQL Query")
-    sql_query = st.text_input(
-        "",
+
+    query = st.text_area(
+        "Insert Query",
         value="",
-        on_change=None,
+        label_visibility="hidden",
         placeholder="SELECT NAME FROM EMPLOYEE",
+        key=QueryserState.QUERY,
     )
 
-    if sql_query:
-        st.markdown("The current query is **{}**".format(sql_query))
-
+    if query and queryser.tokenizer.validate_sql(query):
+        st.button("Analyze")
+    
+    
+class QueryserState(enum.StrEnum):
+    QUERY = enum.auto()
 
 home()
+
