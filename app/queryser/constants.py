@@ -6,8 +6,8 @@ class Table(enum.StrEnum):
     TRADE_UNION = "TRADE UNION"
 
     @classmethod
-    def keys(cls) -> list[Self]:
-        return [table for table in cls]
+    def keys(cls, exclude: str | None = None) -> list[Self]:
+        return [table for table in cls if table != exclude]
 
 class States(enum.Enum):
     ...

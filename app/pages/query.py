@@ -46,7 +46,7 @@ def join_query_view() -> None:
 
     t2_col1, t2_col2 = st.columns(2)
     with t2_col1:
-        table2 = st.selectbox("Table 2", Table.keys(), index=1)
+        table2 = st.selectbox("Table 2", Table.keys(exclude=table1), index=0)
     with t2_col2:
         t2_columns = st.multiselect(
             "Columns",
