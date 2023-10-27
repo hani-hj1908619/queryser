@@ -1,24 +1,34 @@
-from dataclasses import dataclass, Field
+import enum
 from typing import Any
 from queryser.constants import Table
+import pydantic
 
-@dataclass
-class FilterClause:
+class FilterClause(pydantic.BaseModel):
     column: str
 
-@dataclass
+
 class EqualityFilter(FilterClause):
-    negated: bool = False
+    negated: bool = pydantic.Field(False)
     value: Any
 
-@dataclass
 class RangeFilter(FilterClause):
     min_value: Any = None
     max_value: Any = None
 
-@dataclass
-class SimpleQueryInfo:
-    table: Table
-    res_attrs: list[str] = Field(default_factory=list)
-    where_attrs: list[FilterClause] = Field(default_factory=list)
+
+class QueryType(enum.StrEnum):
+    NORMAL = enum.auto()
+    JOIN = enum.auto()
+
+class SimpleQueryInfo(pydantic.BaseModel):
+    table: Table | None = None
+    res_attrs: list[str] = pydantic.Field(default_factory=list)
+    where_attrs: list[FilterClause] = pydantic.Field(default_factory=list)
     
+class JoinQueryInfo(pydantic.BaseModel):
+    pass
+
+class QueryInfo(pydantic.BaseModel):
+    type: QueryType = QueryType.NORMAL
+    simple: SimpleQueryInfo | None = None
+    join: JoinQueryInfo | None = None

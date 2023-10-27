@@ -3,3 +3,4 @@ streamlit
 supabase
 sqlvalidator
 postgrest
+pydantic
