@@ -10,3 +10,5 @@ st.set_page_config(
 
 st.title("Metadata and Statistics")
 st.dataframe(data=repo.read_metadata_table())
+
+st.dataframe(data=repo.read_table_stats())
