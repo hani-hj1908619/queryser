@@ -20,13 +20,17 @@ class QueryType(enum.StrEnum):
     NORMAL = enum.auto()
     JOIN = enum.auto()
 
+    
 class SimpleQueryInfo(pydantic.BaseModel):
     table: Table | None = None
     res_attrs: list[str] = pydantic.Field(default_factory=list)
     where_attrs: list[FilterClause] = pydantic.Field(default_factory=list)
     
 class JoinQueryInfo(pydantic.BaseModel):
-    pass
+    table_1_query: SimpleQueryInfo
+    table_2_query: SimpleQueryInfo
+    table_1_attr: str
+    table_2_attr: str
 
 class QueryInfo(pydantic.BaseModel):
     type: QueryType = QueryType.NORMAL

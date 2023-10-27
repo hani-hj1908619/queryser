@@ -1,7 +1,7 @@
 import streamlit as st
 import repo
 from queryser.constants import Table
-from queryser.query import QueryType, SimpleQueryInfo, QueryInfo
+from queryser.query import JoinQueryInfo, QueryType, SimpleQueryInfo, QueryInfo, RangeFilter, EqualityFilter
 import enum
 
 class State(enum.StrEnum):
@@ -169,13 +169,64 @@ def selection_condition_view() -> None:
 
 def analyze() -> None:
     st.write(st.session_state)
-    # info = QueryInfo()
-    # is_join_query = st.session_state["is_join_query"]
-    # if is_join_query:
-    #     info.type = QueryType.JOIN
-    # else:
-    #     info.type = QueryType.NORMAL
+    if st.session_state[State.is_join_query]:
+        query_info = JoinQueryInfo(
+            table_1_query=SimpleQueryInfo(
+                table=Table(st.session_state[State.join_table(0)]),
+                res_attrs=st.session_state[State.display_columns(0)],
+            ),
+            table_2_query=SimpleQueryInfo(
+                table=Table(st.session_state[State.join_table(1)]),
+                res_attrs=st.session_state[State.display_columns(1)],
+            ),
+            table_1_attr=st.session_state[State.join_column(0)],
+            table_2_attr=st.session_state[State.join_column(1)],
+        )
         
-        
+        for i in range(st.session_state[State.num_conditions]):
+            condition_type = st.session_state[State.condition_type(i)]
+            table =  st.session_state[State.condition_table(i)]
+            filterr = None
+            if condition_type == "Equality":
+                filterr = EqualityFilter(
+                    column=st.session_state[State.condition_column(i)],
+                    value=st.session_state[State.condition_value(i)],
+                    negated=False,
+                )
+            elif condition_type == "Range":
+                filterr = RangeFilter(
+                    column=st.session_state[State.condition_column(i)],
+                    min=st.session_state[State.condition_min(i)] or None,
+                    max=st.session_state[State.condition_max(i)] or None,
+                )
+            if table == st.session_state[State.join_table(0)]:
+                query_info.table_1_query.where_attrs.append(filterr)
+            elif table == st.session_state[State.join_table(1)]:
+                query_info.table_2_query.where_attrs.append(filterr)
+    else:
+        query_info = SimpleQueryInfo(
+            table=Table(st.session_state[State.select_table]),
+            res_attrs=st.session_state[State.display_columns()],
+        )
+        for i in range(st.session_state[State.num_conditions]):
+            condition_type = st.session_state[State.condition_type(i)]
+            if condition_type == "Equality":
+                query_info.where_attrs.append(
+                    EqualityFilter(
+                        column=st.session_state[State.condition_column(i)],
+                        value=st.session_state[State.condition_value(i)],
+                        negated=False,
+                    )
+                )
+            elif condition_type == "Range":
+                query_info.where_attrs.append(
+                    RangeFilter(
+                        column=st.session_state[State.condition_column(i)],
+                        min=st.session_state[State.condition_min(i)] or None,
+                        max=st.session_state[State.condition_max(i)] or None,
+                    )
+                )
+
+    st.write(query_info.model_dump())
 
 main()
