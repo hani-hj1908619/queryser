@@ -2,12 +2,6 @@ import streamlit as st
 import repo
 from queryser.constants import Table
 
-employee_columns = repo.read_employee_table_columns()
-employee_key_columns = repo.read_employee_key_columns()
-trade_union_columns = repo.read_trade_union_table_columns()
-trade_union_key_columns = repo.read_trade_union_key_columns()
-
-# fix
 
 def main() -> None:
     st.set_page_config(page_title="Query", layout="wide")
