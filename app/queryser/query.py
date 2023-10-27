@@ -26,7 +26,7 @@ class QueryType(enum.StrEnum):
 class SimpleQueryInfo(pydantic.BaseModel):
     table: Table | None = None
     res_attrs: list[str] = pydantic.Field(default_factory=list)
-    where_attrs: list[Union[EqualityFilter, RangeFilter]] = pydantic.Field(
+    where_attrs: list[EqualityFilter | RangeFilter] = pydantic.Field(
         default_factory=list
     )
 
