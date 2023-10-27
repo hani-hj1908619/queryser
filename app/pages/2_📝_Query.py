@@ -55,8 +55,10 @@ class State(enum.StrEnum):
 
 
 def main() -> None:
-    st.set_page_config(page_title="Query", page_icon='📝', layout="wide")
+    st.set_page_config(page_title="Query", page_icon="📝", layout="wide")
+
     st.subheader("Select")
+
     is_join_query = st.checkbox(
         "Is equi-join query",
         key=State.is_join_query,
@@ -233,7 +235,9 @@ def analyze() -> None:
         )
         for i in range(st.session_state[State.num_conditions]):
             condition_type = st.session_state[State.condition_type(i)]
-            if condition_type == "Equal" or condition_type == "Not Equal":
+            if (
+                condition_type == "Equal" or condition_type == "Not Equal"
+            ) and st.session_state[State.condition_value(i)]:
                 query_info.where_attrs.append(
                     EqualityFilter(
                         column=st.session_state[State.condition_column(i)],
@@ -258,12 +262,14 @@ def analyze() -> None:
         join=query_info if is_join_query else None,
     )
 
-    st.success("Query model created successfully", icon='✅')
-    st.markdown("""
+    st.success("Query model created successfully", icon="✅")
+    st.markdown(
+        """
         Navigate to [Query Optimizer](./Optimizer) 👈 to learn more about query optimizer\
 
         Navigate to [Costs](./Cost) 👈 to learn more about costs for different excution plans
-    """)
+    """
+    )
 
 
 main()
