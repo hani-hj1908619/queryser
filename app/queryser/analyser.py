@@ -7,26 +7,25 @@ class Cost:
     value: float
     
 def primary_key_cost(size: int) -> Cost:
-    """
-    Cost of querying a primary key column
-    Table would be sorted by the primary key column
-    An index would be used to find the row
-    We should be to search the index in O(log(n)) time
-    Then read the row in O(1) time
-    """
     return Cost(
-        equation="log(n) + 1",
-        value=math.log(size, 2) + 1,
+        equation="log(n)",
+        value=math.log(size, 2),
     )
 
 def secondary_key_cost(size: int) -> Cost:
-    """
-    Cost of querying a secondary key column
-    An B+ index would be used to find the row
-    We should be to search the index in height of the tree
-    Then read the row in O(1) time
-    """
     return Cost(
         equation="h + 1",
         value=math.log(size, 2) + 1,
+    )
+
+def primary_key_range_cost(size: int, range_size: int) -> Cost:
+    return Cost(
+        equation="log(n) + r",
+        value=math.log(size, 2) + range_size,
+    )
+
+def secondary_key_range_cost(size: int, range_size: int) -> Cost:
+    return Cost(
+        equation="h + r + 1",
+        value=math.log(size, 2) + range_size + 1,
     )

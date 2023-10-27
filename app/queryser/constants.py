@@ -1,6 +1,8 @@
 import enum
 from typing import Self
 
+QUERY_MODEL = "query_model"
+
 class Table(enum.StrEnum):
     EMPLOYEE = "EMPLOYEE"
     TRADE_UNION = "TRADE UNION"

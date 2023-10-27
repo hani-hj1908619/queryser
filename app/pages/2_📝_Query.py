@@ -1,13 +1,13 @@
 import streamlit as st
 import repo
-from queryser.constants import Table
+from queryser.constants import QUERY_MODEL, Table
 from queryser.query import (
     JoinQueryInfo,
-    QueryType,
     SimpleQueryInfo,
-    QueryInfo,
     RangeFilter,
     EqualityFilter,
+    QueryInfo,
+    QueryType,
 )
 import enum
 
@@ -55,7 +55,7 @@ class State(enum.StrEnum):
 
 
 def main() -> None:
-    st.set_page_config(page_title="Query", layout="wide")
+    st.set_page_config(page_title="Query", page_icon='📝', layout="wide")
     st.subheader("Select")
     is_join_query = st.checkbox(
         "Is equi-join query", value=False, key=State.is_join_query
@@ -73,7 +73,7 @@ def normal_query_view() -> None:
     with t1_col1:
         table = st.selectbox("Table", Table.keys(), index=0, key=State.select_table)
     with t1_col2:
-        t1_columns = st.multiselect(
+        st.multiselect(
             "Columns",
             repo.read_table_columns(table),
             placeholder="Select columns to be displayed",
@@ -94,7 +94,7 @@ def join_query_view() -> None:
             key=State.join_table(0),
         )
     with t1_col2:
-        t1_columns = st.multiselect(
+        st.multiselect(
             "Columns",
             repo.read_table_columns(table1),
             placeholder="Select columns to be displayed",
@@ -110,7 +110,7 @@ def join_query_view() -> None:
             key=State.join_table(1),
         )
     with t2_col2:
-        t2_columns = st.multiselect(
+        st.multiselect(
             "Columns",
             repo.read_table_columns(table2),
             placeholder="Select columns to be displayed",
@@ -123,13 +123,13 @@ def join_query_view() -> None:
 
     join_cond_col1, join_cond_col2 = st.columns(2)
     with join_cond_col1:
-        t1_join_column = st.selectbox(
+        st.selectbox(
             f"{table1} join column",
             ["trade_union_id"] if table1 == Table.EMPLOYEE else ["id"],
             key=State.join_column(0),
         )
     with join_cond_col2:
-        t2_join_column = st.selectbox(
+        st.selectbox(
             f"{table2} join column",
             ["trade_union_id"] if table2 == Table.EMPLOYEE else ["id"],
             key=State.join_column(1),
@@ -164,7 +164,7 @@ def selection_condition_view() -> None:
             )
 
         with condition_col3:
-            condition_column = st.selectbox(
+            st.selectbox(
                 "Column",
                 repo.read_table_key_columns(table),
                 key=State.condition_column(i),
@@ -249,8 +249,13 @@ def analyze() -> None:
                         max_value=st.session_state[State.condition_max(i)] or None,
                     )
                 )
-
+    st.session_state.clear()
     st.write(query_info.model_dump())
+    st.session_state[QUERY_MODEL] = QueryInfo(
+        type=QueryType.JOIN if st.session_state[State.is_join_query] else QueryType.NORMAL,
+        simple=query_info if not st.session_state[State.is_join_query] else None,
+        join=query_info if st.session_state[State.is_join_query] else None,
+    )
 
 
 main()

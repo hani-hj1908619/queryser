@@ -1,5 +1,4 @@
 from db import supabase
-from postgrest import APIResponse
 import pandas as pd
 from functools import lru_cache
 from queryser import constants
