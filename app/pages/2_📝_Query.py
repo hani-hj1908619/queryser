@@ -218,8 +218,8 @@ def analyze() -> None:
             elif condition_type == "Range":
                 filterr = RangeFilter(
                     column=st.session_state[State.condition_column(i)],
-                    min=st.session_state[State.condition_min(i)] or None,
-                    max=st.session_state[State.condition_max(i)] or None,
+                    min_value=st.session_state[State.condition_min(i)] or None,
+                    max_value=st.session_state[State.condition_max(i)] or None,
                 )
             if table == st.session_state[State.join_table(0)]:
                 query_info.table_1_query.where_attrs.append(filterr)
@@ -245,8 +245,8 @@ def analyze() -> None:
                 query_info.where_attrs.append(
                     RangeFilter(
                         column=st.session_state[State.condition_column(i)],
-                        min=st.session_state[State.condition_min(i)] or None,
-                        max=st.session_state[State.condition_max(i)] or None,
+                        min_value=st.session_state[State.condition_min(i)] or None,
+                        max_value=st.session_state[State.condition_max(i)] or None,
                     )
                 )
 
