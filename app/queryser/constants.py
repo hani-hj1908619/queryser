@@ -13,3 +13,7 @@ class Table(enum.StrEnum):
 
 class States(enum.Enum):
     ...
+
+class IndexType(enum.StrEnum):
+    PRIMARY = "primary"
+    NONCLUSTERED = "nonclustered"

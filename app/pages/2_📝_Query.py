@@ -263,13 +263,12 @@ def analyze() -> None:
     )
 
     st.success("Query model created successfully", icon="✅")
-    st.markdown(
-        """
+    st.markdown("""
         Navigate to [Query Optimizer](./Optimizer) 👈 to learn more about query optimizer\
-
+        
+        
         Navigate to [Costs](./Cost) 👈 to learn more about costs for different excution plans
-    """
-    )
+    """)
 
 
 main()

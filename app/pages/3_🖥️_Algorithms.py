@@ -1,3 +1,4 @@
+from time import sleep
 import streamlit as st
 from queryser.query import QueryInfo, QueryType, EqualityFilter, RangeFilter
 from queryser.constants import QUERY_MODEL
@@ -8,18 +9,22 @@ def main() -> None:
     st.set_page_config(
         page_title="Algorithms",
         page_icon="��🖥️",
-        layout="centered",
+        layout="wide",
         initial_sidebar_state="expanded",
     )
 
     st.title("Query Algorithms")
 
     if QUERY_MODEL not in st.session_state:
-        switch_page("Query")
+        st.error("Please select a query first", icon='❗')
+        with st.spinner("Redirecting to Query page..."):
+            sleep(1.5)
+            switch_page("Query")
+        
     else:
         st.subheader("SQL Query")
 
-        query_model = st.session_state[QUERY_MODEL]
+        query_model: QueryInfo = st.session_state[QUERY_MODEL]
         model_dump = (
             query_model.simple.model_dump()
             if query_model.simple
@@ -61,7 +66,7 @@ def generate_sql_query(query_info: QueryInfo) -> str:
             elif isinstance(filter_clause, RangeFilter):
                 if filter_clause.min_value and filter_clause.max_value:
                     where_clauses.append(
-                        f"{filter_clause.column} BETWEEN {filter_clause.min_value} AND {filter_clause.max_value}"
+                        f"{filter_clause.column} BETWEEN ({filter_clause.min_value} AND {filter_clause.max_value})"
                     )
                 elif filter_clause.min_value:
                     where_clauses.append(

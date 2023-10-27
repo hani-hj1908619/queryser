@@ -3,6 +3,7 @@ import pandas as pd
 from functools import lru_cache
 from queryser import constants
 
+from typing import TypedDict
 
 @lru_cache
 def read_metadata_table() -> pd.DataFrame:
@@ -108,4 +109,18 @@ def read_table_stats() -> list:
             "Rows": [employee_count, trade_union_count],
             "Blocks": [employee_count, trade_union_count],
         }
+    )
+
+
+class ColumnStats(TypedDict):
+    index_type: constants.IndexType | None
+    is_unique: bool
+
+def read_column_stats(table: constants.Table, column: str) -> ColumnStats:
+    metadata = read_metadata_table()
+    metadata = metadata.loc[metadata["table_name"] == table.value.lower()]
+    metadata = metadata.loc[metadata["column_name"] == column]
+    return ColumnStats(
+        index_type=constants.IndexType(metadata["index_type"].values[0]),
+        is_unique=True if metadata["is_unique"].values[0] == "True" else False,
     )
