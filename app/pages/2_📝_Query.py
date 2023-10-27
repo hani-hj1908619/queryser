@@ -252,7 +252,6 @@ def analyze() -> None:
                 )
     is_join_query = st.session_state[State.is_join_query]
     st.session_state.clear()
-    st.write(query_info.model_dump())
     st.session_state[QUERY_MODEL] = QueryInfo(
         type=QueryType.JOIN if is_join_query else QueryType.NORMAL,
         simple=query_info if not is_join_query else None,
