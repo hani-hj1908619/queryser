@@ -1,8 +1,16 @@
 import streamlit as st
 import repo
 from queryser.constants import Table
-from queryser.query import JoinQueryInfo, QueryType, SimpleQueryInfo, QueryInfo, RangeFilter, EqualityFilter
+from queryser.query import (
+    JoinQueryInfo,
+    QueryType,
+    SimpleQueryInfo,
+    QueryInfo,
+    RangeFilter,
+    EqualityFilter,
+)
 import enum
+
 
 class State(enum.StrEnum):
     is_join_query = enum.auto()
@@ -12,51 +20,58 @@ class State(enum.StrEnum):
     @classmethod
     def display_columns(cls, i: int | None = None) -> str:
         return f"display_columns_{i}" if i is not None else "display_columns"
+
     @classmethod
     def join_table(cls, i: int | None = None) -> str:
         return f"join_table_{i}" if i is not None else "join_table"
-    @classmethod
-    def condition_table(cls, i: int | None = None) -> str:
-        return f"condition_table_{i}" if i is not None else "condition_table"
-    @classmethod
-    def condition_type(cls, i: int | None = None) -> str:
-        return f"condition_type_{i}" if i is not None else "condition_type"
-    @classmethod
-    def condition_column(cls, i: int | None = None) -> str:
-        return f"condition_column_{i}" if i is not None else "condition_column"
+
     @classmethod
     def join_column(cls, i: int | None = None) -> str:
         return f"join_column_{i}" if i is not None else "join_column"
+
+    @classmethod
+    def condition_type(cls, i: int | None = None) -> str:
+        return f"condition_type_{i}" if i is not None else "condition_type"
+
+    @classmethod
+    def condition_table(cls, i: int | None = None) -> str:
+        return f"condition_table_{i}" if i is not None else "condition_table"
+
+    @classmethod
+    def condition_column(cls, i: int | None = None) -> str:
+        return f"condition_column_{i}" if i is not None else "condition_column"
+
     @classmethod
     def condition_value(cls, i: int | None = None) -> str:
         return f"condition_value_{i}" if i is not None else "condition_value"
+
     @classmethod
     def condition_min(cls, i: int | None = None) -> str:
         return f"condition_min_{i}" if i is not None else "condition_min"
+
     @classmethod
     def condition_max(cls, i: int | None = None) -> str:
         return f"condition_max_{i}" if i is not None else "condition_max"
 
+
 def main() -> None:
     st.set_page_config(page_title="Query", layout="wide")
     st.subheader("Select")
-    is_join_query = st.checkbox("Is equi-join query", value=False, key=State.is_join_query)
+    is_join_query = st.checkbox(
+        "Is equi-join query", value=False, key=State.is_join_query
+    )
     if is_join_query:
         join_query_view()
     else:
         normal_query_view()
-            
+
     st.button("Analyse", on_click=analyze)
-    
+
+
 def normal_query_view() -> None:
     t1_col1, t1_col2 = st.columns(2)
     with t1_col1:
-        table = st.selectbox(
-            "Table",
-            Table.keys(),
-            index=0,
-            key=State.select_table
-        )
+        table = st.selectbox("Table", Table.keys(), index=0, key=State.select_table)
     with t1_col2:
         t1_columns = st.multiselect(
             "Columns",
@@ -135,12 +150,18 @@ def selection_condition_view() -> None:
         with condition_col1:
             condition_type = st.selectbox(
                 "Condition type",
-                ["Equality", "Range"],
+                ["Equal", "Not Equal", "Range"],
                 key=State.condition_type(i),
             )
 
         with condition_col2:
-            table = st.selectbox("Table", Table.keys(), key=State.condition_table(i))
+            table = st.selectbox(
+                "Table",
+                Table.keys()
+                if st.session_state[State.is_join_query]
+                else [st.session_state[State.select_table]],
+                key=State.condition_table(i),
+            )
 
         with condition_col3:
             condition_column = st.selectbox(
@@ -167,6 +188,7 @@ def selection_condition_view() -> None:
         on_click=lambda: add_condition(),
     )
 
+
 def analyze() -> None:
     st.write(st.session_state)
     if st.session_state[State.is_join_query]:
@@ -182,10 +204,10 @@ def analyze() -> None:
             table_1_attr=st.session_state[State.join_column(0)],
             table_2_attr=st.session_state[State.join_column(1)],
         )
-        
+
         for i in range(st.session_state[State.num_conditions]):
             condition_type = st.session_state[State.condition_type(i)]
-            table =  st.session_state[State.condition_table(i)]
+            table = st.session_state[State.condition_table(i)]
             filterr = None
             if condition_type == "Equality":
                 filterr = EqualityFilter(
@@ -228,5 +250,6 @@ def analyze() -> None:
                 )
 
     st.write(query_info.model_dump())
+
 
 main()
