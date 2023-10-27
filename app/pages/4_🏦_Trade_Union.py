@@ -9,4 +9,4 @@ st.set_page_config(
 )
 
 st.title("Trade Union Table")
-st.table(repo.read_trade_union_table())
+st.dataframe(repo.read_trade_union_table(), use_container_width=True)

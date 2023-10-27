@@ -10,4 +10,4 @@ st.set_page_config(
 )
 
 st.title("Employee Table")
-st.dataframe(data=repo.read_employee_table())
+st.dataframe(data=repo.read_employee_table(), use_container_width=True)
