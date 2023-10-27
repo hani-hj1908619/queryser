@@ -171,7 +171,7 @@ def selection_condition_view() -> None:
             )
 
         with condition_col4:
-            if condition_type == "Equality":
+            if condition_type == "Equal" or condition_type == "Not Equal":
                 st.text_input("Value", key=State.condition_value(i))
             elif condition_type == "Range":
                 range_col1, range_col2 = st.columns(2)
