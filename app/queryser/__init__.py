@@ -1,1 +1,1 @@
-from . import analyser, tokenizer
+from . import analyser, query

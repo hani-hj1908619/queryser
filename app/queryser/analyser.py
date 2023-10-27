@@ -18,4 +18,15 @@ def primary_key_cost(size: int) -> Cost:
         equation="log(n) + 1",
         value=math.log(size, 2) + 1,
     )
-    
+
+def secondary_key_cost(size: int) -> Cost:
+    """
+    Cost of querying a secondary key column
+    An B+ index would be used to find the row
+    We should be to search the index in height of the tree
+    Then read the row in O(1) time
+    """
+    return Cost(
+        equation="h + 1",
+        value=math.log(size, 2) + 1,
+    )
