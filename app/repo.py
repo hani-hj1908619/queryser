@@ -6,6 +6,11 @@ from queryser import constants
 
 
 @lru_cache
+def read_metadata_table() -> pd.DataFrame:
+    res = supabase.table("metadata").select("*").execute()
+    return pd.DataFrame(res.data)
+
+@lru_cache
 def read_employee_table() -> pd.DataFrame:
     res = supabase.table("employee").select("*").execute()
     return pd.DataFrame(res.data)
