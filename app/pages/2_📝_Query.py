@@ -58,7 +58,9 @@ def main() -> None:
     st.set_page_config(page_title="Query", page_icon='📝', layout="wide")
     st.subheader("Select")
     is_join_query = st.checkbox(
-        "Is equi-join query", value=False, key=State.is_join_query
+        "Is equi-join query",
+        key=State.is_join_query,
+        value=False,
     )
     if is_join_query:
         join_query_view()
@@ -249,12 +251,13 @@ def analyze() -> None:
                         max_value=st.session_state[State.condition_max(i)] or None,
                     )
                 )
+    is_join_query = st.session_state[State.is_join_query]
     st.session_state.clear()
     st.write(query_info.model_dump())
     st.session_state[QUERY_MODEL] = QueryInfo(
-        type=QueryType.JOIN if st.session_state[State.is_join_query] else QueryType.NORMAL,
-        simple=query_info if not st.session_state[State.is_join_query] else None,
-        join=query_info if st.session_state[State.is_join_query] else None,
+        type=QueryType.JOIN if st.session_state[is_join_query] else QueryType.NORMAL,
+        simple=query_info if not st.session_state[is_join_query] else None,
+        join=query_info if st.session_state[is_join_query] else None,
     )
 
 
