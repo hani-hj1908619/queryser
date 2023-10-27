@@ -8,6 +8,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-st.title("Metadata and Statistics")
+st.title("Metadata")
 st.dataframe(data=repo.read_metadata_table(), use_container_width=True)
+st.title("Statistics")
 st.dataframe(data=repo.read_table_stats(), use_container_width=True)
