@@ -192,7 +192,6 @@ def selection_condition_view() -> None:
 
 
 def analyze() -> None:
-    st.write(st.session_state)
     if st.session_state[State.is_join_query]:
         query_info = JoinQueryInfo(
             table_1_query=SimpleQueryInfo(
