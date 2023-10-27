@@ -209,11 +209,11 @@ def analyze() -> None:
             condition_type = st.session_state[State.condition_type(i)]
             table = st.session_state[State.condition_table(i)]
             filterr = None
-            if condition_type == "Equality":
+            if condition_type == "Equal" or condition_type == "Not Equal":
                 filterr = EqualityFilter(
                     column=st.session_state[State.condition_column(i)],
                     value=st.session_state[State.condition_value(i)],
-                    negated=False,
+                    negated=condition_type == "Not Equal",
                 )
             elif condition_type == "Range":
                 filterr = RangeFilter(
@@ -232,14 +232,15 @@ def analyze() -> None:
         )
         for i in range(st.session_state[State.num_conditions]):
             condition_type = st.session_state[State.condition_type(i)]
-            if condition_type == "Equality":
+            if condition_type == "Equal" or condition_type == "Not Equal":
                 query_info.where_attrs.append(
                     EqualityFilter(
                         column=st.session_state[State.condition_column(i)],
                         value=st.session_state[State.condition_value(i)],
-                        negated=False,
+                        negated=condition_type == "Not Equal",
                     )
                 )
+
             elif condition_type == "Range":
                 query_info.where_attrs.append(
                     RangeFilter(
