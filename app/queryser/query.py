@@ -1,10 +1,21 @@
+from dataclasses import dataclass
 import enum
 from typing import Any
 from queryser.constants import Table
 import pydantic
 
 
+@dataclass
+class Cost:
+    algorithm_name: str
+    equation: str
+    value: float
+    initial_size: int = 0
+    matched_size: int = 0
+
+
 class FilterClause(pydantic.BaseModel):
+    cost: Cost | None = None
     column: str
 
 
