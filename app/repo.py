@@ -4,7 +4,6 @@ import pandas as pd
 from functools import lru_cache
 from queryser import constants
 
-from typing import TypedDict
 
 @lru_cache
 def read_metadata_table() -> pd.DataFrame:

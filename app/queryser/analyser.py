@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from itertools import permutations
 import math
 

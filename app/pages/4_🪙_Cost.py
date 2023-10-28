@@ -3,7 +3,7 @@ from time import sleep
 import streamlit as st
 from streamlit_extras.switch_page_button import switch_page
 from queryser import analyser 
-from queryser.constants import QUERY_MODEL, IndexType
+from queryser.constants import QUERY_MODEL
 from queryser.query import (
     QueryInfo,
     SimpleQueryInfo,
@@ -13,14 +13,6 @@ from queryser.query import (
     EqualityFilter,
     RangeFilter,
 )
-from queryser.analyser import (
-    Cost,
-    primary_key_cost,
-    primary_key_range_cost,
-    secondary_key_cost,
-    secondary_key_range_cost,
-)
-from itertools import permutations
 import pandas as pd
 import repo
 
@@ -72,7 +64,7 @@ def simple_select_cost(query_info: SimpleQueryInfo) -> None:
     perms.sort(key=lambda perm: sum_costs(perm))
 
     st.subheader("Query permutations")
-    
+
     for i, perm in enumerate(perms, start=1):
         sum = sum_costs(perm)
         with st.expander(f"Perm({i}) - Cost: {math.ceil(sum)}"):
@@ -88,6 +80,7 @@ def simple_select_cost(query_info: SimpleQueryInfo) -> None:
                 }),
                 use_container_width=True
             )
+
 
 def join_select_cost(query_info: JoinQueryInfo) -> None:
     pass
