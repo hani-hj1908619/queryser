@@ -48,8 +48,6 @@ def main() -> None:
 
 def generate_sql_query(query_info: QueryInfo) -> str:
     if query_info.type == QueryType.NORMAL:
-        table_name = query_info.simple.table.name
-
         res_attrs = (
             ", ".join(query_info.simple.res_attrs)
             if query_info.simple.res_attrs
@@ -60,6 +58,8 @@ def generate_sql_query(query_info: QueryInfo) -> str:
         for filter_clause in query_info.simple.where_attrs:
             where_clauses.append(generate_where_clause(filter_clause))
 
+        sql_query = f"SELECT {res_attrs} FROM {query_info.simple.table.name}"
+
         where_clause = " AND ".join(where_clauses)
         sql_query += f" WHERE {where_clause};" if where_clause else ";"
 
@@ -67,32 +67,32 @@ def generate_sql_query(query_info: QueryInfo) -> str:
         table1_name = query_info.join.table_1_query.table.name
         table2_name = query_info.join.table_2_query.table.name
 
-        select_query = ""
+        select_clause = ""
         if not (
             query_info.join.table_1_query.res_attrs
             or query_info.join.table_2_query.res_attrs
         ):
-            select_query = "*"
+            select_clause = "*"
         else:
             if query_info.join.table_1_query.res_attrs:
                 prefixed_res_attrs = [
                     f"{table1_name}.{attr}"
                     for attr in query_info.join.table_1_query.res_attrs
                 ]
-                select_query += ", ".join(prefixed_res_attrs)
+                select_clause += ", ".join(prefixed_res_attrs)
             else:
-                select_query += f"{table1_name}.*"
+                select_clause += f"{table1_name}.*"
 
-            select_query += ", "
+            select_clause += ", "
 
             if query_info.join.table_2_query.res_attrs:
                 prefixed_res_attrs = [
                     f"{table2_name}.{attr}"
                     for attr in query_info.join.table_2_query.res_attrs
                 ]
-                select_query += ", ".join(prefixed_res_attrs)
+                select_clause += ", ".join(prefixed_res_attrs)
             else:
-                select_query += f"{table2_name}.*"
+                select_clause += f"{table2_name}.*"
 
         where_clauses = []
         # Add WHERE clauses for table 1 conditions
@@ -104,7 +104,7 @@ def generate_sql_query(query_info: QueryInfo) -> str:
             where_clauses.append(generate_where_clause(filter_clause, table2_name))
 
         join_condition = f"{table1_name}.{query_info.join.table_1_attr} = {table2_name}.{query_info.join.table_2_attr}"
-        sql_query = f"SELECT {select_query} FROM {table1_name} JOIN {table2_name} ON {join_condition}"
+        sql_query = f"SELECT {select_clause} FROM {table1_name} JOIN {table2_name} ON {join_condition}"
 
         where_clause = " AND ".join(where_clauses)
         sql_query += f" WHERE {where_clause};" if where_clause else ";"
