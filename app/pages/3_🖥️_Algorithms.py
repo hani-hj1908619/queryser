@@ -16,7 +16,7 @@ def main() -> None:
     st.title("Query Algorithms")
 
     if QUERY_MODEL not in st.session_state:
-        st.error("Please select a query first", icon='❗')
+        st.error("Please select a query first", icon="❗")
         with st.spinner("Redirecting to Query page..."):
             sleep(1.5)
             switch_page("Query")
@@ -58,95 +58,91 @@ def generate_sql_query(query_info: QueryInfo) -> str:
 
         where_clauses = []
         for filter_clause in query_info.simple.where_attrs:
-            if isinstance(filter_clause, EqualityFilter):
-                operator = "!=" if filter_clause.negated else "="
-                where_clauses.append(
-                    f"{filter_clause.column} {operator} {filter_clause.value}"
-                )
-            elif isinstance(filter_clause, RangeFilter):
-                if filter_clause.min_value and filter_clause.max_value:
-                    where_clauses.append(
-                        f"{filter_clause.column} BETWEEN ({filter_clause.min_value} AND {filter_clause.max_value})"
-                    )
-                elif filter_clause.min_value:
-                    where_clauses.append(
-                        f"{filter_clause.column} >= {filter_clause.min_value}"
-                    )
-                elif filter_clause.max_value:
-                    where_clauses.append(
-                        f"{filter_clause.column} <= {filter_clause.max_value}"
-                    )
+            where_clauses.append(generate_where_clause(filter_clause))
 
         where_clause = " AND ".join(where_clauses)
-        if where_clause:
-            sql_query = f"SELECT {res_attrs} FROM {table_name} WHERE {where_clause};"
-        else:
-            sql_query = f"SELECT {res_attrs} FROM {table_name};"
+        sql_query += f" WHERE {where_clause};" if where_clause else ";"
 
     elif query_info.type == QueryType.JOIN:
-        # Handle JOIN queries here
         table1_name = query_info.join.table_1_query.table.name
         table2_name = query_info.join.table_2_query.table.name
-        table1_attrs = ", ".join(
-            query_info.join.table_1_query.res_attrs) if query_info.join.table_1_query.res_attrs else "*"
-        table2_attrs = ", ".join(
-            query_info.join.table_2_query.res_attrs) if query_info.join.table_2_query.res_attrs else "*"
+
+        select_query = ""
+        if not (
+            query_info.join.table_1_query.res_attrs
+            or query_info.join.table_2_query.res_attrs
+        ):
+            select_query = "*"
+        else:
+            if query_info.join.table_1_query.res_attrs:
+                prefixed_res_attrs = [
+                    f"{table1_name}.{attr}"
+                    for attr in query_info.join.table_1_query.res_attrs
+                ]
+                select_query += ", ".join(prefixed_res_attrs)
+            else:
+                select_query += f"{table1_name}.*"
+
+            select_query += ", "
+
+            if query_info.join.table_2_query.res_attrs:
+                prefixed_res_attrs = [
+                    f"{table2_name}.{attr}"
+                    for attr in query_info.join.table_2_query.res_attrs
+                ]
+                select_query += ", ".join(prefixed_res_attrs)
+            else:
+                select_query += f"{table2_name}.*"
 
         where_clauses = []
         # Add WHERE clauses for table 1 conditions
         for filter_clause in query_info.join.table_1_query.where_attrs:
-            if isinstance(filter_clause, EqualityFilter):
-                operator = "!=" if filter_clause.negated else "="
-                where_clauses.append(
-                    f"{table1_name}.{filter_clause.column} {operator} {filter_clause.value}"
-                )
-            elif isinstance(filter_clause, RangeFilter):
-                if filter_clause.min_value and filter_clause.max_value:
-                    where_clauses.append(
-                        f"{table1_name}.{filter_clause.column} BETWEEN {filter_clause.min_value} AND {filter_clause.max_value}"
-                    )
-                elif filter_clause.min_value:
-                    where_clauses.append(
-                        f"{table1_name}.{filter_clause.column} >= {filter_clause.min_value}"
-                    )
-                elif filter_clause.max_value:
-                    where_clauses.append(
-                        f"{table1_name}.{filter_clause.column} <= {filter_clause.max_value}"
-                    )
+            where_clauses.append(generate_where_clause(filter_clause, table1_name))
 
         # Add WHERE clauses for table 2 conditions
         for filter_clause in query_info.join.table_2_query.where_attrs:
-            if isinstance(filter_clause, EqualityFilter):
-                operator = "!=" if filter_clause.negated else "="
-                where_clauses.append(
-                    f"{table2_name}.{filter_clause.column} {operator} {filter_clause.value}"
-                )
-            elif isinstance(filter_clause, RangeFilter):
-                if filter_clause.min_value and filter_clause.max_value:
-                    where_clauses.append(
-                        f"{table2_name}.{filter_clause.column} BETWEEN {filter_clause.min_value} AND {filter_clause.max_value}"
-                    )
-                elif filter_clause.min_value:
-                    where_clauses.append(
-                        f"{table2_name}.{filter_clause.column} >= {filter_clause.min_value}"
-                    )
-                elif filter_clause.max_value:
-                    where_clauses.append(
-                        f"{table2_name}.{filter_clause.column} <= {filter_clause.max_value}"
-                    )
+            where_clauses.append(generate_where_clause(filter_clause, table2_name))
 
-        # Add JOIN condition
         join_condition = f"{table1_name}.{query_info.join.table_1_attr} = {table2_name}.{query_info.join.table_2_attr}"
+        sql_query = f"SELECT {select_query} FROM {table1_name} JOIN {table2_name} ON {join_condition}"
 
         where_clause = " AND ".join(where_clauses)
-        if where_clause:
-            sql_query = f"SELECT {table1_attrs}, {table2_attrs} FROM {table1_name} JOIN {table2_name} ON {join_condition} WHERE {where_clause};"
-        else:
-            sql_query = f"SELECT {table1_attrs}, {table2_attrs} FROM {table1_name} JOIN {table2_name} ON {join_condition};"
+        sql_query += f" WHERE {where_clause};" if where_clause else ";"
 
     else:
         raise ValueError("Invalid query type")
     return sql_query
+
+
+def generate_where_clause(
+    filter_clause: EqualityFilter | RangeFilter, table_name: str = ""
+) -> str:
+    where_clause = ""
+
+    if table_name:
+        table_name += "."
+
+    if isinstance(filter_clause, EqualityFilter):
+        operator = "!=" if filter_clause.negated else "="
+        where_clause = (
+            f"{table_name or ''}{filter_clause.column} {operator} {filter_clause.value}"
+        )
+
+    elif isinstance(filter_clause, RangeFilter):
+        if filter_clause.min_value and filter_clause.max_value:
+            where_clause = f"{table_name or ''}{filter_clause.column} BETWEEN ({filter_clause.min_value} AND {filter_clause.max_value})"
+        elif filter_clause.min_value:
+            where_clause = (
+                f"{table_name or ''}{filter_clause.column} >= {filter_clause.min_value}"
+            )
+        elif filter_clause.max_value:
+            where_clause = (
+                f"{table_name or ''}{filter_clause.column} <= {filter_clause.max_value}"
+            )
+    else:
+        raise ValueError("Unhandled filter type")
+
+    return where_clause
 
 
 main()
