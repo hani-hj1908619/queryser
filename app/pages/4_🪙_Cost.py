@@ -12,6 +12,7 @@ from queryser.query import (
     RangeFilter,
 )
 from queryser.analyser import (
+    Cost,
     primary_key_cost,
     primary_key_range_cost,
     secondary_key_cost,
@@ -45,22 +46,25 @@ def simple_select_cost(query_info: SimpleQueryInfo) -> None:
     for perm in clauses_perms:
         curr_df, curr_cost = df.copy(), []
         for clause in perm:
-            size = curr_df.size
+            st.dataframe(curr_df)
+            initial_size = curr_df.shape[0]
             col_stat = repo.read_column_stats(table=query_info.table, column=clause.column)
+
             if isinstance(clause, EqualityFilter):
                 
+                if clause.negated:
+                    curr_df: pd.DataFrame = curr_df[curr_df[clause.column] != clause.value]
+                else:
+                    curr_df: pd.DataFrame = curr_df[curr_df[clause.column] == clause.value]
+    
                 if col_stat.index_type == IndexType.PRIMARY:
-                    cost = primary_key_cost(size)
+                    cost = primary_key_cost(initial_size)
                 elif col_stat.index_type == IndexType.NONCLUSTERED:
-                    cost = secondary_key_cost(size)
+                    cost = secondary_key_cost(initial_size)
                 else:
                     raise ValueError(f"Invalid index type {col_stat.index_type}")
                 
-                if clause.negated:
-                    curr_df = curr_df[curr_df[clause.column] != clause.value]
-                else:
-                    curr_df = curr_df[curr_df[clause.column] == clause.value]
-                
+                cost.matched = curr_df.shape[0] - initial_size
                 curr_cost.append(cost)
 
             elif isinstance(clause, RangeFilter):
@@ -73,16 +77,24 @@ def simple_select_cost(query_info: SimpleQueryInfo) -> None:
                 elif clause.max_value is not None:
                     curr_df = curr_df[curr_df[clause.column] <= clause.max_value]
 
+                after_size = curr_df.shape[0]
+                
                 if col_stat.index_type == IndexType.PRIMARY:
-                    cost = primary_key_range_cost(size=size, range_size=curr_df.size)
+                    cost = primary_key_range_cost(size=initial_size, range_size=after_size)
                 elif col_stat.index_type == IndexType.NONCLUSTERED:
-                    cost = secondary_key_range_cost(size=size, range_size=curr_df.size)
+                    cost = secondary_key_range_cost(size=initial_size, range_size=after_size)
                 else:
                     raise ValueError(f"Invalid index type {col_stat.index_type}")
 
+                cost.matched = after_size - initial_size
                 curr_cost.append(cost)
-        
-        st.write(curr_cost)
+            
+            else:
+                raise ValueError(f"Invalid clause type {type(clause)}")    
+            
+            st.write(curr_cost)
+            st.write(sum([c.value for c in curr_cost]))
+        costs.append(curr_cost)
 
 def join_select_cost(query_info: JoinQueryInfo) -> None:
     pass

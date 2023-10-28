@@ -12,7 +12,6 @@ st.set_page_config(
 def home():
     st.title("Welcome to Queryser 🚀")
     st.markdown("## A simple tool to analyze sql queries")
-    
     st.info("👈 Queryser currently only suports simple select andf equijoin queries over keys")
 
 

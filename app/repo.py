@@ -1,3 +1,4 @@
+import pydantic
 from db import supabase
 import pandas as pd
 from functools import lru_cache
@@ -112,7 +113,7 @@ def read_table_stats() -> list:
     )
 
 
-class ColumnStats(TypedDict):
+class ColumnStats(pydantic.BaseModel):
     index_type: constants.IndexType | None
     is_unique: bool
 
