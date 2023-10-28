@@ -209,51 +209,25 @@ def analyze() -> None:
         )
 
         for i in range(st.session_state[State.num_conditions]):
-            condition_type = st.session_state[State.condition_type(i)]
-            table = st.session_state[State.condition_table(i)]
-            filterr = None
-            if condition_type == "Equal" or condition_type == "Not Equal":
-                filterr = EqualityFilter(
-                    column=st.session_state[State.condition_column(i)],
-                    value=st.session_state[State.condition_value(i)],
-                    negated=condition_type == "Not Equal",
-                )
-            elif condition_type == "Range":
-                filterr = RangeFilter(
-                    column=st.session_state[State.condition_column(i)],
-                    min_value=st.session_state[State.condition_min(i)] or None,
-                    max_value=st.session_state[State.condition_max(i)] or None,
-                )
-            if table == st.session_state[State.join_table(0)]:
-                query_info.table_1_query.where_attrs.append(filterr)
-            elif table == st.session_state[State.join_table(1)]:
-                query_info.table_2_query.where_attrs.append(filterr)
+            filter = generate_filter(i)
+
+            if filter:
+                table = st.session_state[State.condition_table(i)]
+                if table == st.session_state[State.join_table(0)]:
+                    query_info.table_1_query.where_attrs.append(filter)
+                elif table == st.session_state[State.join_table(1)]:
+                    query_info.table_2_query.where_attrs.append(filter)
     else:
         query_info = SimpleQueryInfo(
             table=Table(st.session_state[State.select_table]),
             res_attrs=st.session_state[State.display_columns()],
         )
-        for i in range(st.session_state[State.num_conditions]):
-            condition_type = st.session_state[State.condition_type(i)]
-            if (
-                condition_type == "Equal" or condition_type == "Not Equal"
-            ) and st.session_state[State.condition_value(i)]:
-                query_info.where_attrs.append(
-                    EqualityFilter(
-                        column=st.session_state[State.condition_column(i)],
-                        value=st.session_state[State.condition_value(i)],
-                        negated=condition_type == "Not Equal",
-                    )
-                )
 
-            elif condition_type == "Range":
-                query_info.where_attrs.append(
-                    RangeFilter(
-                        column=st.session_state[State.condition_column(i)],
-                        min_value=st.session_state[State.condition_min(i)] or None,
-                        max_value=st.session_state[State.condition_max(i)] or None,
-                    )
-                )
+        for i in range(st.session_state[State.num_conditions]):
+            filter = generate_filter(i)
+            if filter:
+                query_info.where_attrs.append(filter)
+
     is_join_query = st.session_state[State.is_join_query]
     st.session_state.clear()
     st.session_state[QUERY_MODEL] = QueryInfo(
@@ -263,12 +237,42 @@ def analyze() -> None:
     )
 
     st.success("Query model created successfully", icon="✅")
-    st.markdown("""
+    st.markdown(
+        """
         Navigate to [Query Optimizer](./Optimizer) 👈 to learn more about query optimizer\
         
         
         Navigate to [Costs](./Cost) 👈 to learn more about costs for different excution plans
-    """)
+    """
+    )
+
+
+def generate_filter(condition_number: int):
+    condition_type = st.session_state[State.condition_type(condition_number)]
+    table = st.session_state[State.condition_table(condition_number)]
+
+    filter = None
+    if condition_type == "Equal" or condition_type == "Not Equal":
+        if st.session_state[State.condition_value(condition_number)]:
+            filter = EqualityFilter(
+                column=st.session_state[State.condition_column(condition_number)],
+                value=st.session_state[State.condition_value(condition_number)],
+                negated=condition_type == "Not Equal",
+            )
+    elif condition_type == "Range":
+        if (
+            st.session_state[State.condition_min(condition_number)]
+            or st.session_state[State.condition_max(condition_number)]
+        ):
+            filter = RangeFilter(
+                column=st.session_state[State.condition_column(condition_number)],
+                min_value=st.session_state[State.condition_min(condition_number)]
+                or None,
+                max_value=st.session_state[State.condition_max(condition_number)]
+                or None,
+            )
+
+    return filter
 
 
 main()
