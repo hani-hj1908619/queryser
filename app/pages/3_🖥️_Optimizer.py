@@ -7,13 +7,13 @@ from queryser.builder import generate_sql_query
 
 def main() -> None:
     st.set_page_config(
-        page_title="Algorithms",
+        page_title="Optimizer",
         page_icon="��🖥️",
         layout="wide",
         initial_sidebar_state="expanded",
     )
 
-    st.title("Query Algorithms")
+    st.title("Query Optimizer")
 
     if QUERY_MODEL not in st.session_state:
         st.error("Please select a query first", icon="❗")
