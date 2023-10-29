@@ -70,12 +70,30 @@ for i in range(40):
     email_counter += 1
     phone_counter += random.randint(1000, 10000)
 
-print(f"Created {len(employees)} rows for the EMPLOYEE table.")
+print(f"Created {len(employees)} rows for the EMPLOYEE table.\n")
 
-#store the data as JSON objects in JSON file called data.JSON
+#? store the data as JSON objects in JSON file to be extracted later
 import json
 with open('data.json', 'w') as outfile:
     json.dump(employees, outfile)
     
 with open('data.json', 'a') as outfile:
-    json.dump(trade_unions,outfile)
+    json.dump(trade_unions, outfile)
+
+def extract(list):
+    values=""
+    for data in list:
+        values += "("
+        for key, value in data.items():
+            if isinstance(value, str):
+                values = values + f"'{value}',"
+            else:
+                values = values + f"{value},"
+        values = values[:-1] + f"),"
+    values = values[:-2] + ";"
+    return values
+
+print(extract(trade_unions))
+#! print(extract(employees))
+with open('data.txt', 'w') as outfile:
+    json.dump(extract(employees) , outfile)
