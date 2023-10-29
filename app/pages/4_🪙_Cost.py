@@ -60,7 +60,42 @@ def simple_select_cost(query_info: SimpleQueryInfo) -> None:
     st.subheader("Initial table")
     st.dataframe(df)
     
-    perms = analyser.get_simple_select_costs(df, query_info.table, query_info.where_attrs)
+    perms, _ = analyser.get_simple_select_costs(df, query_info.table, query_info.where_attrs)
+    perms.sort(key=lambda perm: sum_costs(perm))
+
+    st.subheader("Query permutations")
+
+    for i, perm in enumerate(perms, start=1):
+        sum = sum_costs(perm) or df.shape[0]
+        with st.expander(f"Perm({i}) - Cost: {math.ceil(sum)}"):
+            if sum == df.shape[0]:
+                st.write("No filtering")
+            else:
+                st.dataframe(
+                    pd.DataFrame({
+                        "Table Size": [clause.cost.initial_size for clause in perm],
+                        "Column": [clause.column for clause in perm],
+                        "Condition": [condition_clause(clause) for clause in perm],
+                        "Algorithm": [clause.cost.algorithm_name for clause in perm],
+                        "Matched": [clause.cost.matched_size for clause in perm],
+                        "Equation": [clause.cost.equation for clause in perm],
+                        "Cost": [math.ceil(clause.cost.value) for clause in perm],
+                    }),
+                    use_container_width=True
+                )
+
+
+def join_select_cost(query_info: JoinQueryInfo) -> None:
+    df1 = repo.read_employee_table()
+    df2 = repo.read_trade_union_table()
+    
+    st.subheader("Initial tables")
+    st.subheader("Employee")
+    st.dataframe(df1)
+    st.subheader("Trade Union")
+    st.dataframe(df2)
+    
+    perms = analyser.get_join_select_costs(df1, df2, query_info)
     perms.sort(key=lambda perm: sum_costs(perm))
 
     st.subheader("Query permutations")
@@ -80,9 +115,5 @@ def simple_select_cost(query_info: SimpleQueryInfo) -> None:
                 }),
                 use_container_width=True
             )
-
-
-def join_select_cost(query_info: JoinQueryInfo) -> None:
-    pass
 
 main()

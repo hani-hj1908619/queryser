@@ -15,6 +15,7 @@ class Cost:
 
 
 class FilterClause(pydantic.BaseModel):
+    table: Table | None = None
     cost: Cost | None = None
     column: str
 

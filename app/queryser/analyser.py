@@ -42,7 +42,7 @@ def secondary_key_range_cost(size: int, range_size: int) -> Cost:
 
 def get_simple_select_costs(
     df: pd.DataFrame, table: Table, filterrs: list[tuple[EqualityFilter | RangeFilter]]
-) -> list[list[EqualityFilter | RangeFilter]]:
+) -> tuple[list[list[EqualityFilter | RangeFilter]], pd.DataFrame]:
     clauses_perms: list[list[EqualityFilter | RangeFilter]] = list(
         permutations(filterrs, len(filterrs))
     )
@@ -107,4 +107,23 @@ def get_simple_select_costs(
 
         perms.append(clauses)
 
-    return perms
+    return perms, curr_df
+
+def get_join_select_costs(
+    df1: pd.DataFrame,
+    df2: pd.DataFrame,
+    df1_filterrs: list[tuple[EqualityFilter | RangeFilter]],
+    df2_filterrs: list[tuple[EqualityFilter | RangeFilter]],
+) -> tuple[
+    list[list[EqualityFilter | RangeFilter]],
+    list[list[EqualityFilter | RangeFilter]],
+    pd.DataFrame
+]:
+    t1_perms, df1_latest = get_simple_select_costs(df1, Table.EMPLOYEE, df1_filterrs)
+    t2_perms, df2_latest = get_simple_select_costs(df2, Table.TRADE_UNION, df2_filterrs)
+    
+    final_df = pd.merge(df1_latest, df2_latest, left_on="trade_union_id", right_on="id")
+    
+    perms = []
+    
+    
