@@ -40,6 +40,14 @@ def secondary_key_range_cost(size: int, range_size: int) -> Cost:
     )
 
 
+def non_key_non_indexed_cost(size: int) -> Cost:
+    return Cost(
+        algorithm_name="Linear Search",
+        equation="b/2 (avg)",
+        value=size / 2 if size else 0,
+    )
+
+
 def generate_condition_clause(clause: EqualityFilter | RangeFilter) -> str:
     if isinstance(clause, EqualityFilter):
         if clause.negated:
@@ -89,7 +97,7 @@ def get_simple_select_costs(
                 elif col_stat.index_type == IndexType.NONCLUSTERED:
                     cost = secondary_key_cost(initial_size)
                 else:
-                    raise ValueError(f"Invalid index type {col_stat.index_type}")
+                    cost = non_key_non_indexed_cost(initial_size)
 
             elif isinstance(clause, RangeFilter):
                 if clause.min_value is not None and clause.max_value is not None:
@@ -111,7 +119,7 @@ def get_simple_select_costs(
                         size=initial_size, range_size=after_size
                     )
                 else:
-                    raise ValueError(f"Invalid index type {col_stat.index_type}")
+                    cost = non_key_non_indexed_cost(initial_size)
 
             else:
                 raise ValueError(f"Invalid clause type {type(clause)}")
