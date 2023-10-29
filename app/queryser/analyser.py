@@ -85,10 +85,12 @@ def get_simple_select_costs(
                     curr_df: pd.DataFrame = curr_df[
                         curr_df[clause.column] != clause.value
                     ]
+                    cost.matched_size = initial_size - curr_df.shape[0]
                 else:
                     curr_df: pd.DataFrame = curr_df[
                         curr_df[clause.column] == clause.value
                     ]
+                    cost.matched_size = curr_df.shape[0]
 
                 after_size = curr_df.shape[0]
 
@@ -98,7 +100,7 @@ def get_simple_select_costs(
                     cost = secondary_key_cost(initial_size)
                 else:
                     cost = non_key_non_indexed_cost(initial_size)
-
+                
             elif isinstance(clause, RangeFilter):
                 if clause.min_value is not None and clause.max_value is not None:
                     curr_df = curr_df[curr_df[clause.column] >= clause.min_value]
@@ -121,11 +123,12 @@ def get_simple_select_costs(
                 else:
                     cost = non_key_non_indexed_cost(initial_size)
 
+                cost.matched_size = after_size
+                
             else:
                 raise ValueError(f"Invalid clause type {type(clause)}")
 
             cost.initial_size = initial_size
-            cost.matched_size = initial_size - after_size
             new_clause = clause.model_copy()
             new_clause.cost = cost
             clauses.append(new_clause)
