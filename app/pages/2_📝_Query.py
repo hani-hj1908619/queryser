@@ -170,7 +170,7 @@ def selection_condition_view() -> None:
         with condition_col3:
             st.selectbox(
                 "Column",
-                repo.read_table_key_columns(table),
+                repo.read_table_columns(table),
                 key=State.condition_column(i),
             )
 
