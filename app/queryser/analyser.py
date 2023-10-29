@@ -80,19 +80,8 @@ def get_simple_select_costs(
             col_stat = repo.read_column_stats(table=table, column=clause.column)
             initial_size = curr_df.shape[0]
 
+                
             if isinstance(clause, EqualityFilter):
-                if clause.negated:
-                    curr_df: pd.DataFrame = curr_df[
-                        curr_df[clause.column] != clause.value
-                    ]
-                    cost.matched_size = initial_size - curr_df.shape[0]
-                else:
-                    curr_df: pd.DataFrame = curr_df[
-                        curr_df[clause.column] == clause.value
-                    ]
-                    cost.matched_size = curr_df.shape[0]
-
-                after_size = curr_df.shape[0]
 
                 if col_stat.index_type == IndexType.PRIMARY:
                     cost = primary_key_cost(initial_size)
@@ -100,6 +89,12 @@ def get_simple_select_costs(
                     cost = secondary_key_cost(initial_size)
                 else:
                     cost = non_key_non_indexed_cost(initial_size)
+                if clause.negated:
+                    curr_df: pd.DataFrame = curr_df[curr_df[clause.column] != clause.value]
+                    cost.matched_size = initial_size - curr_df.shape[0]
+                else:
+                    curr_df: pd.DataFrame = curr_df[curr_df[clause.column] == clause.value]
+                    cost.matched_size = curr_df.shape[0]
                 
             elif isinstance(clause, RangeFilter):
                 if clause.min_value is not None and clause.max_value is not None:
