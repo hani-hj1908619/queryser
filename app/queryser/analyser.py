@@ -167,14 +167,15 @@ def get_best_algorithms(query_info: QueryInfo) -> pd.DataFrame:
                 elif col_stat.index_type == IndexType.NONCLUSTERED:
                     algorithms.append("B+ Tree Search")
                 else:
-                    raise ValueError(f"Invalid index type {col_stat.index_type}")
+                    algorithms.append("Linear Search")
             elif isinstance(condition, RangeFilter):
                 if col_stat.index_type == IndexType.PRIMARY:
                     algorithms.append("Binary Search + Sequential Scan")
                 elif col_stat.index_type == IndexType.NONCLUSTERED:
                     algorithms.append("Range B+ Tree Search")
                 else:
-                    raise ValueError(f"Invalid index type {col_stat.index_type}")
+                    algorithms.append("Linear Search")
+
     elif query_info.type == QueryType.JOIN:
         pass
 

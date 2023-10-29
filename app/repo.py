@@ -120,8 +120,9 @@ def read_column_stats(table: constants.Table, column: str) -> ColumnStats:
     metadata = read_metadata_table()
     metadata = metadata.loc[metadata["table_name"] == table.value.lower()]
     metadata = metadata.loc[metadata["column_name"] == column]
+    index_type = metadata["index_type"].values[0]
     return ColumnStats(
-        index_type=constants.IndexType(metadata["index_type"].values[0]),
+        index_type=constants.IndexType(index_type) if index_type else None,
         is_unique=True if metadata["is_unique"].values[0] == "True" else False,
     )
 
