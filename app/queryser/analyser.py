@@ -4,7 +4,13 @@ import math
 import pandas as pd
 from queryser.constants import IndexType, Table
 
-from queryser.query import EqualityFilter, RangeFilter, Cost
+from queryser.query import (
+    EqualityFilter,
+    RangeFilter,
+    Cost,
+    SimpleQueryInfo,
+    JoinQueryInfo,
+)
 import repo
 
 
@@ -38,6 +44,23 @@ def secondary_key_range_cost(size: int, range_size: int) -> Cost:
         equation="h + r",
         value=math.log(size, 2) + range_size if size else 0,
     )
+
+
+def generate_condition_clause(clause: EqualityFilter | RangeFilter) -> str:
+    if isinstance(clause, EqualityFilter):
+        if clause.negated:
+            return f"!= {clause.value}"
+        else:
+            return f"= {clause.value}"
+    elif isinstance(clause, RangeFilter):
+        if clause.min_value and clause.max_value:
+            return f"∈ [{clause.min_value}, {clause.max_value}]"
+        elif clause.min_value:
+            return f"> {clause.min_value}"
+        else:
+            return f"< {clause.max_value}"
+    else:
+        raise ValueError(f"Invalid clause type {type(clause)}")
 
 
 def get_simple_select_costs(
@@ -109,6 +132,7 @@ def get_simple_select_costs(
 
     return perms, curr_df
 
+
 def get_join_select_costs(
     df1: pd.DataFrame,
     df2: pd.DataFrame,
@@ -117,13 +141,11 @@ def get_join_select_costs(
 ) -> tuple[
     list[list[EqualityFilter | RangeFilter]],
     list[list[EqualityFilter | RangeFilter]],
-    pd.DataFrame
+    pd.DataFrame,
 ]:
     t1_perms, df1_latest = get_simple_select_costs(df1, Table.EMPLOYEE, df1_filterrs)
     t2_perms, df2_latest = get_simple_select_costs(df2, Table.TRADE_UNION, df2_filterrs)
-    
+
     final_df = pd.merge(df1_latest, df2_latest, left_on="trade_union_id", right_on="id")
-    
+
     perms = []
-    
-    
