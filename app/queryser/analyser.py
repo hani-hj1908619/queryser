@@ -4,13 +4,7 @@ import math
 import pandas as pd
 from queryser.constants import IndexType, Table
 
-from queryser.query import (
-    EqualityFilter,
-    RangeFilter,
-    Cost,
-    SimpleQueryInfo,
-    JoinQueryInfo,
-)
+from queryser.query import EqualityFilter, RangeFilter, Cost, QueryInfo, QueryType
 import repo
 
 
@@ -149,3 +143,39 @@ def get_join_select_costs(
     final_df = pd.merge(df1_latest, df2_latest, left_on="trade_union_id", right_on="id")
 
     perms = []
+
+
+def get_best_algorithms(query_info: QueryInfo) -> pd.DataFrame:
+    conditions = []
+    algorithms = []
+
+    if query_info.type == QueryType.NORMAL:
+        query = query_info.simple
+
+        for condition in query.where_attrs:
+            conditions.append(
+                f"{query.table}.{condition.column} {generate_condition_clause(condition)}"
+            )
+
+            col_stat = repo.read_column_stats(
+                table=query.table, column=condition.column
+            )
+
+            if isinstance(condition, EqualityFilter):
+                if col_stat.index_type == IndexType.PRIMARY:
+                    algorithms.append("Binary Search")
+                elif col_stat.index_type == IndexType.NONCLUSTERED:
+                    algorithms.append("B+ Tree Search")
+                else:
+                    raise ValueError(f"Invalid index type {col_stat.index_type}")
+            elif isinstance(condition, RangeFilter):
+                if col_stat.index_type == IndexType.PRIMARY:
+                    algorithms.append("Binary Search + Sequential Scan")
+                elif col_stat.index_type == IndexType.NONCLUSTERED:
+                    algorithms.append("Range B+ Tree Search")
+                else:
+                    raise ValueError(f"Invalid index type {col_stat.index_type}")
+    elif query_info.type == QueryType.JOIN:
+        pass
+
+    return pd.DataFrame({"Condition": conditions, "Algorithm": algorithms})
