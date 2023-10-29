@@ -124,3 +124,13 @@ def read_column_stats(table: constants.Table, column: str) -> ColumnStats:
         index_type=constants.IndexType(metadata["index_type"].values[0]),
         is_unique=True if metadata["is_unique"].values[0] == "True" else False,
     )
+
+def read_trade_union_ids():
+    res = supabase.table("trade_union").select("id").execute()
+    return [row["id"] for row in res.data]
+
+#function to insert employee table data
+def insert_employee_data(data):
+    supabase.table('employee').insert(data).execute()
+def insert_trade_union_data(data):
+    supabase.table('trade_union').insert(data).execute()
