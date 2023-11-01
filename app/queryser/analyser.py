@@ -66,7 +66,9 @@ def generate_condition_clause(clause: EqualityFilter | RangeFilter) -> str:
 
 
 def get_simple_select_costs(
-    df: pd.DataFrame, table: Table, filterrs: list[tuple[EqualityFilter | RangeFilter]]
+    df: pd.DataFrame,
+    table: Table,
+    filterrs: list[tuple[EqualityFilter | RangeFilter]],
 ) -> tuple[list[list[EqualityFilter | RangeFilter]], pd.DataFrame]:
     clauses_perms: list[list[EqualityFilter | RangeFilter]] = list(
         permutations(filterrs, len(filterrs))
@@ -80,22 +82,23 @@ def get_simple_select_costs(
             col_stat = repo.read_column_stats(table=table, column=clause.column)
             initial_size = curr_df.shape[0]
 
-                
             if isinstance(clause, EqualityFilter):
-
                 if col_stat.index_type == IndexType.PRIMARY:
                     cost = primary_key_cost(initial_size)
                 elif col_stat.index_type == IndexType.NONCLUSTERED:
                     cost = secondary_key_cost(initial_size)
                 else:
                     cost = non_key_non_indexed_cost(initial_size)
+
                 if clause.negated:
-                    curr_df: pd.DataFrame = curr_df[curr_df[clause.column] != clause.value]
-                    cost.matched_size = initial_size - curr_df.shape[0]
+                    curr_df: pd.DataFrame = curr_df[
+                        curr_df[clause.column] != clause.value
+                    ]
                 else:
-                    curr_df: pd.DataFrame = curr_df[curr_df[clause.column] == clause.value]
-                    cost.matched_size = curr_df.shape[0]
-                
+                    curr_df: pd.DataFrame = curr_df[
+                        curr_df[clause.column] == clause.value
+                    ]
+
             elif isinstance(clause, RangeFilter):
                 if clause.min_value is not None and clause.max_value is not None:
                     curr_df = curr_df[curr_df[clause.column] >= clause.min_value]
@@ -118,11 +121,10 @@ def get_simple_select_costs(
                 else:
                     cost = non_key_non_indexed_cost(initial_size)
 
-                cost.matched_size = after_size
-                
             else:
                 raise ValueError(f"Invalid clause type {type(clause)}")
 
+            cost.matched_size = curr_df.shape[0]
             cost.initial_size = initial_size
             new_clause = clause.model_copy()
             new_clause.cost = cost
