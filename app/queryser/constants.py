@@ -6,7 +6,7 @@ QUERY_MODEL = "query_model"
 
 class Table(enum.StrEnum):
     EMPLOYEE = "EMPLOYEE"
-    TRADE_UNION = "TRADE UNION"
+    TRADE_UNION = "TRADE_UNION"
 
     @classmethod
     def keys(cls, exclude: str | None = None) -> list[Self]:
