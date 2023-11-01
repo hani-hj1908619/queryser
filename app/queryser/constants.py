@@ -20,3 +20,11 @@ class States(enum.Enum):
 class IndexType(enum.StrEnum):
     PRIMARY = "primary"
     NONCLUSTERED = "nonclustered"
+
+
+class ColumnType(enum.StrEnum):
+    NUMBER = "number"
+    TEXT = "text"
+    DATE = "date"
+    BOOLEAN = "boolean"
+    UUID = "uuid"
