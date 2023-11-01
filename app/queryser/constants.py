@@ -28,3 +28,4 @@ class ColumnType(enum.StrEnum):
     DATE = "date"
     BOOLEAN = "boolean"
     UUID = "uuid"
+    ENUM = "enum"
