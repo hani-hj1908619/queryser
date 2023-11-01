@@ -56,7 +56,7 @@ def main() -> None:
                 "b [or b/2 on average]",
                 "log2 (b) [or Range Query: log(b) + r]",
                 "h + 1 [or Range Query: h + r]",
-                "1 [Range Query: Not supported)",
+                "1 [Range Query: Not supported]",
                 "h + 1 + s [or Range Query: h + (b/2)]",
             ],
         }
