@@ -113,25 +113,33 @@ def read_table_stats() -> list:
 
 
 class ColumnStats(pydantic.BaseModel):
+    column_type: constants.ColumnType
     index_type: constants.IndexType | None
     is_unique: bool
+
 
 def read_column_stats(table: constants.Table, column: str) -> ColumnStats:
     metadata = read_metadata_table()
     metadata = metadata.loc[metadata["table_name"] == table.value.lower()]
     metadata = metadata.loc[metadata["column_name"] == column]
     index_type = metadata["index_type"].values[0]
+
     return ColumnStats(
+        column_type=constants.ColumnType(metadata["column_type"].values[0]),
         index_type=constants.IndexType(index_type) if index_type else None,
         is_unique=True if metadata["is_unique"].values[0] == "True" else False,
     )
+
 
 def read_trade_union_ids():
     res = supabase.table("trade_union").select("id").execute()
     return [row["id"] for row in res.data]
 
-#function to insert employee table data
+
+# function to insert employee table data
 def insert_employee_data(data):
-    supabase.table('employee').insert(data).execute()
+    supabase.table("employee").insert(data).execute()
+
+
 def insert_trade_union_data(data):
-    supabase.table('trade_union').insert(data).execute()
+    supabase.table("trade_union").insert(data).execute()
