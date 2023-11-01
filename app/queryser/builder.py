@@ -1,4 +1,6 @@
 from queryser.query import QueryInfo, QueryType, EqualityFilter, RangeFilter
+from queryser.constants import ColumnType, Table
+import repo
 
 
 def generate_sql_query(query_info: QueryInfo) -> str:
@@ -11,7 +13,9 @@ def generate_sql_query(query_info: QueryInfo) -> str:
 
         where_clauses = []
         for filter_clause in query_info.simple.where_attrs:
-            where_clauses.append(generate_where_clause(filter_clause))
+            where_clauses.append(
+                generate_where_clause(filter_clause, query_info.simple.table)
+            )
 
         sql_query = f"SELECT {res_attrs} FROM {query_info.simple.table.name}"
 
@@ -52,11 +56,19 @@ def generate_sql_query(query_info: QueryInfo) -> str:
         where_clauses = []
         # Add WHERE clauses for table 1 conditions
         for filter_clause in query_info.join.table_1_query.where_attrs:
-            where_clauses.append(generate_where_clause(filter_clause, table1_name))
+            where_clauses.append(
+                generate_where_clause(
+                    filter_clause, query_info.join.table_1_query.table, join=True
+                )
+            )
 
         # Add WHERE clauses for table 2 conditions
         for filter_clause in query_info.join.table_2_query.where_attrs:
-            where_clauses.append(generate_where_clause(filter_clause, table2_name))
+            where_clauses.append(
+                generate_where_clause(
+                    filter_clause, query_info.join.table_2_query.table, join=True
+                )
+            )
 
         join_condition = f"{table1_name}.{query_info.join.table_1_attr} = {table2_name}.{query_info.join.table_2_attr}"
         sql_query = f"SELECT {select_clause} FROM {table1_name} JOIN {table2_name} ON {join_condition}"
@@ -70,30 +82,40 @@ def generate_sql_query(query_info: QueryInfo) -> str:
 
 
 def generate_where_clause(
-    filter_clause: EqualityFilter | RangeFilter, table_name: str = ""
+    filter_clause: EqualityFilter | RangeFilter, table: Table, join: bool = False
 ) -> str:
     where_clause = ""
 
-    if table_name:
-        table_name += "."
+    col_stat = repo.read_column_stats(table=table, column=filter_clause.column)
+
+    table_prefix = None
+    if join:
+        table_prefix = f"{table.name}."
 
     if isinstance(filter_clause, EqualityFilter):
         operator = "!=" if filter_clause.negated else "="
-        where_clause = (
-            f"{table_name or ''}{filter_clause.column} {operator} {filter_clause.value}"
-        )
+
+        # Surround value with quotes if column type is not number
+        value = filter_clause.value
+        if col_stat.column_type != ColumnType.NUMBER:
+            value = f"'{value}'"
+
+        where_clause = f"{table_prefix or ''}{filter_clause.column} {operator} {value}"
 
     elif isinstance(filter_clause, RangeFilter):
+        # Surround value with quotes if column type is not number
+        min_value = filter_clause.min_value
+        max_value = filter_clause.max_value
+        if col_stat.column_type != ColumnType.NUMBER:
+            min_value = f"'{min_value}'"
+            max_value = f"'{max_value}'"
+
         if filter_clause.min_value and filter_clause.max_value:
-            where_clause = f"{table_name or ''}{filter_clause.column} BETWEEN ({filter_clause.min_value} AND {filter_clause.max_value})"
+            where_clause = f"{table_prefix or ''}{filter_clause.column} BETWEEN ({min_value} AND {max_value})"
         elif filter_clause.min_value:
-            where_clause = (
-                f"{table_name or ''}{filter_clause.column} >= {filter_clause.min_value}"
-            )
+            where_clause = f"{table_prefix or ''}{filter_clause.column} >= {min_value}"
         elif filter_clause.max_value:
-            where_clause = (
-                f"{table_name or ''}{filter_clause.column} <= {filter_clause.max_value}"
-            )
+            where_clause = f"{table_prefix or ''}{filter_clause.column} <= {max_value}"
     else:
         raise ValueError("Unhandled filter type")
 
