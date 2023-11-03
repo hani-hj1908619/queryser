@@ -234,6 +234,31 @@ def get_best_algorithms(query_info: QueryInfo) -> pd.DataFrame:
                     algorithms.append("Linear Search")
 
     elif query_info.type == QueryType.JOIN:
-        pass
-
+        query = query_info.join
+        
+        table_queries = [query.table_1_query, query.table_2_query]
+        for table_query in table_queries:
+            for condition in table_query.where_attrs:
+                table_name = table_query.table
+                conditions.append(
+                    f"{table_name}.{condition.column} {generate_condition_clause(condition)}"
+                )
+                col_stat = repo.read_column_stats(
+                    table=table_name, column=condition.column
+                )
+                if isinstance(condition, EqualityFilter):
+                    if col_stat.index_type == IndexType.PRIMARY:
+                        algorithms.append("Binary Search")
+                    elif col_stat.index_type == IndexType.NONCLUSTERED:
+                        algorithms.append("B+ Tree Search")
+                    else:
+                        algorithms.append("Linear Search")
+                elif isinstance(condition, RangeFilter):
+                    if col_stat.index_type == IndexType.PRIMARY:
+                        algorithms.append("Binary Search + Sequential Scan")
+                    elif col_stat.index_type == IndexType.NONCLUSTERED:
+                        algorithms.append("Range B+ Tree Search")
+                    else:
+                        algorithms.append("Linear Search")
+                        
     return pd.DataFrame({"Condition": conditions, "Algorithm": algorithms})

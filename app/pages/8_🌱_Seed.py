@@ -7,8 +7,8 @@ fake = Faker()
 
 
 trade_union_uuids = [str(uuid.uuid4()) for i in range(10)]
-ssn_counter = 6
-email_counter = 6
+ssn_counter = 1
+email_counter = 1
 phone_counter = 31000000 + random.randint(1000, 10000)
 job_types = ["secretary", "technician", "engineer", "manager"]
 pay_types = ["salaried", "hourly"]
@@ -28,7 +28,7 @@ def insert_unions():
 
 def insert_employees():
     trade_unions = repo.read_trade_union_ids()
-    for i in range(40):
+    for i in range(500):
         global ssn_counter, email_counter, phone_counter
         ssn = f"{ssn_counter:03d}-{(ssn_counter+1)%10}{(ssn_counter+2)%10}{(ssn_counter+3)%10}-{(ssn_counter+4)%10}{(ssn_counter+5)%10}{(ssn_counter+6)%10}{(ssn_counter+7)%10}"
         email = f"employee{email_counter}@example.com"
