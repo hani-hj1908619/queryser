@@ -1,6 +1,4 @@
 import enum
-from typing import Self
-
 QUERY_MODEL = "query_model"
 
 
@@ -9,7 +7,7 @@ class Table(enum.StrEnum):
     TRADE_UNION = "TRADE_UNION"
 
     @classmethod
-    def keys(cls, exclude: str | None = None) -> list[Self]:
+    def keys(cls, exclude: str | None = None) -> list["Table"]:
         return [table for table in cls if table != exclude]
 
 
