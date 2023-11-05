@@ -10,5 +10,5 @@ st.set_page_config(
 
 st.title("Metadata")
 st.dataframe(data=repo.read_metadata_table(), use_container_width=True)
-st.title("Statistics")
+st.title("Index Metadata")
 st.dataframe(data=repo.read_table_stats(), use_container_width=True)
