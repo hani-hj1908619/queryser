@@ -127,7 +127,7 @@ def read_column_stats(table: constants.Table, column: str) -> ColumnStats:
     return ColumnStats(
         column_type=constants.ColumnType(metadata["column_type"].values[0]),
         index_type=constants.IndexType(index_type) if index_type else None,
-        is_unique=True if metadata["is_unique"].values[0] == "True" else False,
+        is_unique=metadata["is_unique"].values[0],
     )
 
 
