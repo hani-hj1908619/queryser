@@ -28,7 +28,7 @@ def insert_unions():
 
 def insert_employees():
     trade_unions = repo.read_trade_union_ids()
-    for i in range(500):
+    for i in range(700):
         global ssn_counter, email_counter, phone_counter
         ssn = f"{ssn_counter:03d}-{(ssn_counter+1)%10}{(ssn_counter+2)%10}{(ssn_counter+3)%10}-{(ssn_counter+4)%10}{(ssn_counter+5)%10}{(ssn_counter+6)%10}{(ssn_counter+7)%10}"
         email = f"employee{email_counter}@example.com"
@@ -44,7 +44,7 @@ def insert_employees():
         typing_speed = random.randint(40, 100) if job_type == "secretary" else None
         t_grade = random.choice(t_grades) if job_type == "technician" else None
         eng_type = random.choice(engineer_roles) if job_type == "engineer" else None
-        pay_type = "hourly" if random.random() < 0.25 else "salaried"
+        pay_type = "hourly" if random.random() < 0.60 else "salaried"
         salary = (
             round(random.uniform(3000, 10000), 2) if pay_type == "salaried" else None
         )

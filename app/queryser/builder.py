@@ -111,7 +111,7 @@ def generate_where_clause(
             max_value = f"'{max_value}'"
 
         if filter_clause.min_value and filter_clause.max_value:
-            where_clause = f"{table_prefix or ''}{filter_clause.column} BETWEEN ({min_value} AND {max_value})"
+            where_clause = f"{table_prefix or ''}{filter_clause.column} BETWEEN {min_value} AND {max_value}"
         elif filter_clause.min_value:
             where_clause = f"{table_prefix or ''}{filter_clause.column} >= {min_value}"
         elif filter_clause.max_value:

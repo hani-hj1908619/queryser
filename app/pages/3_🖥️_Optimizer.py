@@ -10,7 +10,7 @@ from queryser import analyser
 def main() -> None:
     st.set_page_config(
         page_title="Optimizer",
-        page_icon="��🖥️",
+        page_icon="🖥️",
         layout="wide",
         initial_sidebar_state="expanded",
     )
