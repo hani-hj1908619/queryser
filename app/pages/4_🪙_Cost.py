@@ -158,8 +158,8 @@ def join_select_cost(query_info: JoinQueryInfo) -> None:
         st.write("No filtering")
     
     st.subheader("Join cost")
-    df1_last_size = df1_perms[-1][-1].cost.matched_size
-    df2_last_size = df2_perms[-1][-1].cost.matched_size
+    df1_last_size = df1_perms[-1][-1].cost.matched_size if df1_perms[-1] else df1.shape[0]
+    df2_last_size = df2_perms[-1][-1].cost.matched_size if df2_perms[-1] else df2.shape[0]
     st.dataframe(
         pd.DataFrame(
             {
