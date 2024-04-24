@@ -1,6 +1,6 @@
 # SQL Query Cost Estimator
 
-**College of Engineering**  
+**Qatar University**  
 **Department of Computer Science and Engineering**  
 **CMPS 451 – Database Management Systems**  
 **Fall 2023 Course Project**
@@ -17,7 +17,7 @@ We mapped our ER/EER schema to a relational database schema. Here's the schema m
 
 1. From our relational database schema, we picked two tables with at least one relationship between them.
 2. For each table and their respective relationships, we stored metadata and statistics necessary for the query optimizer to choose a proper execution plan. We referred to the textbook and slides to determine the list of features to store and assumed reasonable values for each feature.
-3. We arranged these statistics as relational tables and stored them in our PostgreSQL database hosted on Supabase. Our metadata is like an application hosted on the DBMS, and we connected our frontend application with the database using proper API.
+3. We arranged these statistics as relational tables and stored them in our PostgreSQL database hosted on Supabase.
 
 ![Metadata Tables](https://i.imgur.com/6bbt302.png)
 
